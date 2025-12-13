@@ -187,7 +187,12 @@ class OBJECT_OT_GenerateCloud(Operator):
         boolean_mod.name = "Boolean_Intersect"
         boolean_mod.operation = 'INTERSECT'
         boolean_mod.object = cube
-        boolean_mod.solver = 'FAST'
+
+        try:
+            # Addressing Blender 5.0+ boolean solver name change
+            boolean_mod.solver = 'FLOAT'
+        except TypeError:
+            boolean_mod.solver = 'FAST'
 
         # Apply Boolean Modifier
         bpy.ops.object.modifier_apply(modifier=boolean_mod.name)
