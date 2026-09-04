@@ -22,10 +22,13 @@ A Blender add-on for generating stylized cumulus, cumulonimbus, and stratus clou
 
 ## Install
 
-1. Run `python scripts/package_addon.py` from a source checkout to create the installable archive and its SHA-256 checksum in `dist/`.
-2. In Blender 3.6 or newer, open **Edit → Preferences → Add-ons → Install** and select `dist/cloud-generator-v2.0.0.zip`.
-3. Enable **Cloud Generator**.
-4. Open the 3D Viewport sidebar (`N`) and choose **Cloud Generator**.
+1. Download the add-on ZIP and matching `.sha256` file from the [latest release](https://github.com/bgivenb/blender-cloud-generator/releases/latest).
+2. Verify the archive against the published SHA-256 checksum.
+3. In Blender 3.6 or newer, open **Edit → Preferences → Add-ons → Install** and select the downloaded ZIP.
+4. Enable **Cloud Generator**.
+5. Open the 3D Viewport sidebar (`N`) and choose **Cloud Generator**.
+
+To build the same installable archive from a source checkout, run `python scripts/package_addon.py`; the ZIP and checksum are written to `dist/`.
 
 ## Use
 
