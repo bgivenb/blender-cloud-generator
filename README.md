@@ -1,6 +1,6 @@
 # Cloud Generator for Blender
 
-[![Tests](https://github.com/bgivenb/Blender-Cloud-Generator-/actions/workflows/test.yml/badge.svg)](https://github.com/bgivenb/Blender-Cloud-Generator-/actions/workflows/test.yml)
+[![Tests](https://github.com/bgivenb/blender-cloud-generator/actions/workflows/test.yml/badge.svg)](https://github.com/bgivenb/blender-cloud-generator/actions/workflows/test.yml)
 
 A Blender add-on for generating stylized cumulus, cumulonimbus, and stratus clouds from repeatable procedural layouts. A seed and a small set of bounded controls produce a joined, remeshed cloud mesh with optional volume conversion and sky setup.
 
