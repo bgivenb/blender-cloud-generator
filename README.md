@@ -1,93 +1,62 @@
-Overview
+# Cloud Generator for Blender
 
-Cloud Generator is a powerful Blender addon designed to create realistic and dynamic cloud formations, including Cumulus, Cumulonimbus, and Stratus clouds. With simple controls and customizable settings, artists and creators can generate volumetric cloud environments to enhance their 3D scenes.
-Features
+[![Tests](https://github.com/bgivenb/Blender-Cloud-Generator-/actions/workflows/test.yml/badge.svg)](https://github.com/bgivenb/Blender-Cloud-Generator-/actions/workflows/test.yml)
 
-    Multiple Cloud Types:
-        Cumulus: Fluffy, white clouds with distinct shapes.
-        Cumulonimbus: Towering clouds often associated with thunderstorms.
-        Stratus: Layered, flat clouds covering large areas.
+A Blender add-on for generating stylized cumulus, cumulonimbus, and stratus clouds from repeatable procedural layouts. A seed and a small set of bounded controls produce a joined, remeshed cloud mesh with optional volume conversion and sky setup.
 
-    Customization Options:
-        Hide Mesh: Option to hide the underlying mesh after generating volumetric effects.
-        Add Sky: Automatically adds a realistic sky background to your scene.
-        Target Detail: Adjust the level of detail in the generated clouds to balance between visual quality and performance.
+<a href="https://www.reddit.com/r/blender/comments/1gqi1mj/i_made_a_cloud_generator_plugin_free_download/"><img src="docs/images/original-reddit-demo.gif" alt="Original Cloud Generator workflow in Blender" width="720"></a>
 
-    User-Friendly Interface:
-        Easily accessible panel in the 3D Viewport sidebar.
-        Intuitive controls and sliders for quick adjustments.
+*Excerpt from the original Blender walkthrough. [Watch the complete demo and discussion on r/blender](https://www.reddit.com/r/blender/comments/1gqi1mj/i_made_a_cloud_generator_plugin_free_download/).*
 
-    Volumetric Effects:
-        Realistic volumetric rendering for enhanced visual fidelity.
-        Adjustable voxel settings for performance optimization.
+### Current deterministic mesh output
 
-Installation
+![A stylized cloud generated from seed 29](docs/images/cloud-example.png)
 
-    Download the Addon:
-        Save the cloud_generator.py script to your computer.
+## Design
 
-    Install the Addon in Blender:
-        Open Blender.
-        Go to Edit > Preferences.
-        Click on the Add-ons tab.
-        Click Install... at the top.
-        Navigate to where you saved cloud_generator.py and select it.
-        After installation, enable the addon by checking the box next to Cloud Generator.
+- **Repeatable:** the same cloud type, chunk count, and seed generate the same sphere plan.
+- **Controllable:** chunk count, voxel size, and decimation ratio make the quality/performance trade-off explicit.
+- **Non-destructive by default:** source objects are generated in a dedicated collection; optional volume conversion can hide rather than delete its source mesh.
+- **Failure-aware:** incomplete generated collections are cleaned up if the Blender operation fails.
+- **Testable:** procedural planning is isolated in `cloud_core.py` and covered without requiring Blender.
 
-Usage
+## Install
 
-    Accessing the Addon:
-        In the 3D Viewport, press N to open the sidebar.
-        Navigate to the Cloud Generator tab.
+1. Download `cloudgenerator.py` and `cloud_core.py` into the same directory, then zip them together.
+2. In Blender 3.6 or newer, open **Edit → Preferences → Add-ons → Install** and select the zip.
+3. Enable **Cloud Generator**.
+4. Open the 3D Viewport sidebar (`N`) and choose **Cloud Generator**.
 
-    Generating Clouds:
-        Cloud Type Selection:
-            Choose between Cumulus, Cumulonimbus, or Stratus from the dropdown menu.
-        Hide Mesh:
-            Toggle the Hide Mesh checkbox to show or hide the underlying cloud mesh after applying volumetric effects.
-        Add Sky:
-            Enable the Add Sky checkbox to automatically add a realistic sky background to your scene.
-        Target Detail:
-            Adjust the Target Detail slider to control the decimation ratio. Lower values result in higher detail with more polygons, while higher values reduce polygon count for better performance.
-        Generate Cloud:
-            Click the Generate Cloud button to create the selected cloud type with your specified settings. NOTE: sometimes you may get a glitchy looking cloud, just delete it and try again. 
-        Unhide Cloud Meshes:
-            If you have hidden cloud meshes and wish to reveal them, click the Unhide Cloud Meshes button.
+## Use
 
+Select a cloud type and seed, tune the detail controls, and click **Generate Cloud**. Reuse the seed when you need the same base form in another scene. Enabling **Create volume** adds a live Mesh to Volume modifier and optionally hides the generated mesh.
 
-Customization
+Very small voxel sizes and high chunk counts can be expensive. Start with the defaults and reduce voxel size only when the silhouette needs more detail.
 
-    Sky Texture Parameters:
-        The addon sets up a default sky texture, but you can further customize it by modifying the Sky Texture node in the World shader:
-            Select the World in the Shader Editor.
-            Adjust parameters like Sky Type, Turbidity, and Ground Albedo to achieve different sky appearances.
+## Development
 
-    Extending Cloud Types:
-        While the addon currently supports Cumulus, Cumulonimbus, and Stratus clouds, you can extend it by adding more cloud types following the existing structure in the script.
+Run the dependency-free tests:
 
-License
+```bash
+python -m unittest discover -s tests -v
+```
 
-This project is licensed under the Creative Commons Zero (CC0 1.0 Universal) Public Domain Dedication. You are free to use, modify, and distribute this addon without any restrictions.
-Support & Contact
+Verify add-on registration in Blender:
 
-For any questions, feedback, or support, please reach out via email:
+```bash
+blender --background --python-expr "import sys; sys.path.insert(0, '.'); import cloudgenerator as addon; addon.register(); addon.unregister()"
+```
 
-📧 Email: bgivenb@gmail.com
+Rebuild the checked-in example image:
 
-Created by Given Borthwick
-Troubleshooting
+```bash
+blender --background --python scripts/render_example.py
+```
 
-    Addon Not Appearing:
-        Ensure that the addon is enabled in Edit > Preferences > Add-ons.
-        Check for any syntax errors in the script if you're running it from the Text Editor.
+## Scope
 
-    Cloud Not Generating Correctly:
-        Verify that you have the correct settings selected in the Cloud Generator panel.
-        Adjust the Target Detail slider to see if it affects the outcome.
+This is an independent hobby project and a compact exploration of deterministic procedural modeling around Blender's stateful API.
 
-    Performance Issues:
-        Lower the Target Detail value to reduce polygon count and improve performance, especially on less powerful systems.
+## License
 
-Contributing
-
-This addon is released under the CC0 license, allowing you to use and modify it freely. If you have improvements or additional features you'd like to see, feel free to modify the script as needed.
+[CC0 1.0 Universal](LICENSE)
