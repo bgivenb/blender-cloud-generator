@@ -12,7 +12,10 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, PointerProperty
 from bpy.types import Operator, Panel, PropertyGroup
 
-from cloud_core import build_cloud_plan, validate_settings
+try:
+    from .cloud_core import build_cloud_plan, validate_settings
+except ImportError:  # Support direct execution from a source checkout.
+    from cloud_core import build_cloud_plan, validate_settings
 
 
 class CloudGeneratorProperties(PropertyGroup):
