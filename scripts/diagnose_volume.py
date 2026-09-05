@@ -22,9 +22,31 @@ shader = nodes.new("ShaderNodeVolumePrincipled")
 shader.inputs["Density"].default_value = 0.5
 material.node_tree.links.new(shader.outputs["Volume"], output.inputs["Volume"])
 data.materials.append(material)
-if mode in {"hidden", "parented"}:
+if mode in {"hidden", "parented", "render"}:
     source.hide_render = True
+if mode in {"hidden", "parented", "viewport"}:
     source.hide_set(True)
+if mode == "rays":
+    for attribute in (
+        "visible_camera",
+        "visible_diffuse",
+        "visible_glossy",
+        "visible_transmission",
+        "visible_volume_scatter",
+        "visible_shadow",
+    ):
+        setattr(source, attribute, False)
+if mode == "transparent":
+    surface = bpy.data.materials.new("Invisible diagnostic source")
+    surface.use_nodes = True
+    surface.node_tree.nodes.clear()
+    surface_output = surface.node_tree.nodes.new("ShaderNodeOutputMaterial")
+    transparent = surface.node_tree.nodes.new("ShaderNodeBsdfTransparent")
+    surface.node_tree.links.new(
+        transparent.outputs["BSDF"], surface_output.inputs["Surface"]
+    )
+    source.data.materials.clear()
+    source.data.materials.append(surface)
 if mode == "parented":
     source.parent = volume
 scene.render.engine = "CYCLES"

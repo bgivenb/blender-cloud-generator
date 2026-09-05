@@ -127,11 +127,21 @@ class BlenderIntegrationTests(unittest.TestCase):
         self.assertIsNone(bpy.context.scene.world)
 
     def test_hidden_source_produces_visible_volume_render(self):
+        self._assert_volume_render("CYCLES")
+
+    def test_hidden_source_produces_visible_eevee_volume_render(self):
+        engine = (
+            "BLENDER_EEVEE_NEXT" if bpy.app.version >= (4, 2, 0) else "BLENDER_EEVEE"
+        )
+        self._assert_volume_render(engine)
+
+    def _assert_volume_render(self, engine):
         self.original.hide_render = True
         self.props.create_volume = True
         self.props.at_cursor = False
         self.props.volume_resolution = 32
         bpy.ops.object.generate_cloud()
+        volume = bpy.context.active_object
         scene = bpy.context.scene
         # Use a complete render scene, including an explicit world, across host versions.
         scene.world = bpy.data.worlds.new("Volume render test world")
@@ -145,7 +155,7 @@ class BlenderIntegrationTests(unittest.TestCase):
         bpy.ops.object.light_add(type="AREA", location=(5, -10, 15))
         bpy.context.active_object.data.energy = 1500
         bpy.context.active_object.data.size = 10
-        scene.render.engine = "CYCLES"
+        scene.render.engine = engine
         scene.cycles.device = "CPU"
         scene.cycles.samples = 2
         scene.cycles.use_denoising = False
@@ -162,6 +172,18 @@ class BlenderIntegrationTests(unittest.TestCase):
                     max(image.pixels[:][3::4]),
                     0.01,
                     "Hidden source produced an empty volume",
+                )
+            finally:
+                bpy.data.images.remove(image)
+            volume.hide_render = True
+            scene.render.filepath = str(Path(directory) / "source-only.png")
+            bpy.ops.render.render(write_still=True)
+            image = bpy.data.images.load(scene.render.filepath)
+            try:
+                self.assertLessEqual(
+                    max(image.pixels[:][3::4]),
+                    0.01,
+                    "Hidden source surface leaked into the render",
                 )
             finally:
                 bpy.data.images.remove(image)
