@@ -1,6 +1,7 @@
 """Real Blender checks for volume setup, transforms, and failure cleanup."""
 
 from pathlib import Path
+import faulthandler
 import sys
 import tempfile
 import unittest
@@ -11,6 +12,8 @@ from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import cloudgenerator as addon
+
+faulthandler.enable(all_threads=True)
 
 
 class BlenderIntegrationTests(unittest.TestCase):

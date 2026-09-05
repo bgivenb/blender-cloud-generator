@@ -36,3 +36,9 @@ jobs:
         run: |
           python3 scripts/package_addon.py
           blender --background --factory-startup --python-exit-code 1 --python scripts/verify_package.py
+      - name: Report native Blender crash details
+        if: failure()
+        run: |
+          if [ -f /tmp/blender.crash.txt ]; then
+            sed -n '1,220p' /tmp/blender.crash.txt
+          fi
