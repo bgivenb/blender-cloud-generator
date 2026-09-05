@@ -52,7 +52,7 @@ class BlenderIntegrationTests(unittest.TestCase):
         self.assertFalse(source.hide_viewport)
         self.assertTrue(source.hide_get())
         self.assertFalse(source.hide_render)
-        self.assertFalse(source.visible_camera)
+        self.assertTrue(source.visible_camera)
         self.assertTrue(
             source.data.materials[0].get("cloud_generator_invisible_source")
         )

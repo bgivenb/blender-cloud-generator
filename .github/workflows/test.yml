@@ -50,9 +50,3 @@ jobs:
           if [ -f /tmp/blender.crash.txt ]; then
             sed -n '1,220p' /tmp/blender.crash.txt
           fi
-      - name: Isolate source visibility flags
-        if: failure()
-        run: |
-          for mode in viewport render rays transparent; do
-            blender --background --factory-startup --python-exit-code 1 --python scripts/diagnose_volume.py -- "$mode" || echo "Native volume diagnostic failed: $mode"
-          done

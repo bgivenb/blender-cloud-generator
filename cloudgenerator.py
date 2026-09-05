@@ -61,23 +61,11 @@ def _apply_modifier(context, obj, modifier):
     bpy.ops.object.modifier_apply(modifier=modifier.name)
 
 
-RAY_VISIBILITY = (
-    "visible_camera",
-    "visible_diffuse",
-    "visible_glossy",
-    "visible_transmission",
-    "visible_volume_scatter",
-    "visible_shadow",
-)
-
-
 def _hide_volume_source(cloud, created_materials):
     """Hide the surface without removing a modifier dependency from render evaluation."""
     cloud.hide_set(True)
-    # Blender 4.0.2 can crash in Cycles when a Mesh to Volume source has hide_render set.
+    # Blender 4.0.2 can crash if the source is render-disabled or excluded from all rays.
     cloud.hide_render = False
-    for attribute in RAY_VISIBILITY:
-        setattr(cloud, attribute, False)
     material = bpy.data.materials.new("Cloud Source Invisible Surface")
     created_materials.append(material)
     material["cloud_generator_invisible_source"] = True
@@ -87,7 +75,7 @@ def _hide_volume_source(cloud, created_materials):
     output = nodes.new("ShaderNodeOutputMaterial")
     transparent = nodes.new("ShaderNodeBsdfTransparent")
     material.node_tree.links.new(transparent.outputs["BSDF"], output.inputs["Surface"])
-    # Eevee also needs a transparent surface; the Cycles ray flags alone are insufficient.
+    # A transparent surface hides the mesh in both engines without removing its geometry.
     if hasattr(material, "surface_render_method"):
         material.surface_render_method = "DITHERED"
     elif hasattr(material, "blend_method"):
@@ -289,8 +277,6 @@ class OBJECT_OT_UnhideCloudMeshes(Operator):
             obj.hide_viewport = False
             obj.hide_render = False
             obj.hide_set(False)
-            for attribute in RAY_VISIBILITY:
-                setattr(obj, attribute, True)
             for index in reversed(range(len(obj.data.materials))):
                 material = obj.data.materials[index]
                 if material and material.get("cloud_generator_invisible_source"):
