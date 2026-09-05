@@ -24,9 +24,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Install distro Blender and virtual display
+        timeout-minutes: 5
         run: |
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y blender xvfb xauth
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install --no-install-recommends -y blender xvfb xauth
           blender --version
       - name: Exercise Blender behavior and failure recovery
         env:
