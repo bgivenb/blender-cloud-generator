@@ -163,9 +163,15 @@ class BlenderIntegrationTests(unittest.TestCase):
 
 addon.register()
 try:
-    result = unittest.TextTestRunner(verbosity=2).run(
-        unittest.defaultTestLoader.loadTestsFromTestCase(BlenderIntegrationTests)
+    names = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
+    suite = (
+        unittest.defaultTestLoader.loadTestsFromNames(
+            names, module=sys.modules[__name__]
+        )
+        if names
+        else unittest.defaultTestLoader.loadTestsFromTestCase(BlenderIntegrationTests)
     )
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
 finally:
     addon.unregister()
 if not result.wasSuccessful():
