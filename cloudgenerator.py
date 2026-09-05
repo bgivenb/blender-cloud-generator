@@ -61,6 +61,43 @@ def _apply_modifier(context, obj, modifier):
     bpy.ops.object.modifier_apply(modifier=modifier.name)
 
 
+RAY_VISIBILITY = (
+    "visible_camera",
+    "visible_diffuse",
+    "visible_glossy",
+    "visible_transmission",
+    "visible_volume_scatter",
+    "visible_shadow",
+)
+
+
+def _hide_volume_source(cloud, created_materials):
+    """Hide the surface without removing a modifier dependency from render evaluation."""
+    cloud.hide_set(True)
+    # Blender 4.0.2 can crash in Cycles when a Mesh to Volume source has hide_render set.
+    cloud.hide_render = False
+    for attribute in RAY_VISIBILITY:
+        setattr(cloud, attribute, False)
+    material = bpy.data.materials.new("Cloud Source Invisible Surface")
+    created_materials.append(material)
+    material["cloud_generator_invisible_source"] = True
+    material.use_nodes = True
+    nodes = material.node_tree.nodes
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputMaterial")
+    transparent = nodes.new("ShaderNodeBsdfTransparent")
+    material.node_tree.links.new(transparent.outputs["BSDF"], output.inputs["Surface"])
+    # Eevee also needs a transparent surface; the Cycles ray flags alone are insufficient.
+    if hasattr(material, "surface_render_method"):
+        material.surface_render_method = "DITHERED"
+    elif hasattr(material, "blend_method"):
+        material.blend_method = "HASHED"
+    if hasattr(material, "shadow_method"):
+        material.shadow_method = "NONE"
+    cloud.data.materials.append(material)
+    return material
+
+
 def _add_sky(scene):
     previous = scene.world
     if (
@@ -197,9 +234,7 @@ class OBJECT_OT_GenerateCloud(Operator):
                 volume_data.materials.append(material)
                 cloud.parent = volume
                 if props.hide_mesh:
-                    # Local hiding retains the source in the dependency graph for volume conversion.
-                    cloud.hide_set(True)
-                    cloud.hide_render = True
+                    _hide_volume_source(cloud, created_materials)
                 result = volume
             else:
                 result = cloud
@@ -254,6 +289,14 @@ class OBJECT_OT_UnhideCloudMeshes(Operator):
             obj.hide_viewport = False
             obj.hide_render = False
             obj.hide_set(False)
+            for attribute in RAY_VISIBILITY:
+                setattr(obj, attribute, True)
+            for index in reversed(range(len(obj.data.materials))):
+                material = obj.data.materials[index]
+                if material and material.get("cloud_generator_invisible_source"):
+                    obj.data.materials.pop(index=index)
+                    if material.users == 0:
+                        bpy.data.materials.remove(material)
         self.report({"INFO"}, f"Unhid {len(meshes)} cloud mesh(es)")
         return {"FINISHED"}
 

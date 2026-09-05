@@ -35,7 +35,9 @@ To build the same installable archive from a source checkout, run `python script
 
 In Object Mode, select a cloud type and seed, tune the detail controls, and click **Generate Cloud**. Reuse the seed for the same base layout. The cloud is placed at the 3D cursor by default; disable **Place at 3D cursor** to use the world origin.
 
-**Create volume** adds a live Mesh to Volume modifier and a connected Principled Volume material. Set **Volume voxel amount** for resolution and **Volume density** for the material's density multiplier. **Hide source mesh** hides the generated mesh without disabling it in the viewport dependency graph; **Unhide Generated Meshes** affects only the current view layer. Use a volume-capable render engine and suitable lighting to inspect the volume.
+**Create volume** adds a live Mesh to Volume modifier and a connected Principled Volume material. Set **Volume voxel amount** for resolution and **Volume density** for the material's density multiplier. **Hide source mesh** uses local viewport hiding, disabled Cycles ray visibility, and a transparent source surface for Eevee, while retaining the geometry for modifier evaluation. **Unhide Generated Meshes** restores visibility and removes that generated transparent material; it affects only the current view layer. Use a volume-capable render engine and suitable lighting to inspect the volume.
+
+The source deliberately remains enabled in render evaluation: Blender 4.0.2 can crash when rendering a Mesh to Volume modifier whose source has `hide_render` enabled. `scripts/diagnose_volume.py` reproduces the native issue without loading this add-on.
 
 Voxel remeshing now uses unit-scale geometry rather than inheriting the first sphere's non-uniform scale. This fixes inconsistent voxel dimensions but can change meshes generated with the same v2.0 settings. Seeded sphere layouts remain unchanged. Voxel values are in Blender scene units, not a conversion from the scene's displayed unit system.
 
@@ -52,7 +54,7 @@ python -m unittest discover -s tests -v
 Run host integration tests for cursor placement, unit scale, volume setup, shared worlds, and failure cleanup:
 
 ```bash
-blender --background --factory-startup --python-exit-code 1 --python tests/blender_integration.py
+python scripts/run_blender_tests.py
 ```
 
 Rebuild the checked-in example image:

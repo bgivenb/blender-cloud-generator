@@ -51,7 +51,11 @@ class BlenderIntegrationTests(unittest.TestCase):
         source = modifier.object
         self.assertFalse(source.hide_viewport)
         self.assertTrue(source.hide_get())
-        self.assertTrue(source.hide_render)
+        self.assertFalse(source.hide_render)
+        self.assertFalse(source.visible_camera)
+        self.assertTrue(
+            source.data.materials[0].get("cloud_generator_invisible_source")
+        )
         self.assertEqual(source.parent, volume)
         shader = next(
             node
@@ -61,6 +65,8 @@ class BlenderIntegrationTests(unittest.TestCase):
         self.assertAlmostEqual(shader.inputs["Density"].default_value, 0.7)
         bpy.ops.object.unhide_cloud_meshes()
         self.assertFalse(source.hide_get())
+        self.assertTrue(source.visible_camera)
+        self.assertEqual(len(source.data.materials), 0)
 
     def test_sky_does_not_edit_world_shared_with_another_scene(self):
         shared = bpy.data.worlds.new("Shared world")

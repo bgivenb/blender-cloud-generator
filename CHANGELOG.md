@@ -6,6 +6,7 @@
 - Create a connected Principled Volume material for generated volumes.
 - Normalize sphere-join scale before voxel remeshing; final geometry can differ from v2.0 at the same settings.
 - Keep hidden source meshes available to viewport dependency evaluation.
+- Retain source geometry in render evaluation while hiding its surface, avoiding a Blender 4.0.2 Cycles crash.
 - Copy worlds for optional sky setup, avoiding changes to other scenes sharing a world.
 - Clean unused generated data and restore selection on failure.
 - Add Blender integration tests and packaged-install verification to CI.
