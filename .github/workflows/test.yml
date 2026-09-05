@@ -17,3 +17,22 @@ jobs:
           python-version: "3.13"
       - run: python -m unittest discover -s tests -v
       - run: python scripts/package_addon.py
+
+  blender:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install distro Blender and virtual display
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y blender xvfb xauth
+          blender --version
+      - name: Exercise Blender behavior and failure recovery
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a blender --background --factory-startup --python-exit-code 1 --python tests/blender_integration.py
+      - name: Build and verify installable package
+        run: |
+          python3 scripts/package_addon.py
+          blender --background --factory-startup --python-exit-code 1 --python scripts/verify_package.py

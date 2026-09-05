@@ -10,8 +10,9 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 PACKAGE = "cloud_generator"
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 SOURCES = {
+    f"{PACKAGE}/LICENSE": ROOT / "LICENSE",
     f"{PACKAGE}/__init__.py": ROOT / "cloudgenerator.py",
     f"{PACKAGE}/cloud_core.py": ROOT / "cloud_core.py",
 }

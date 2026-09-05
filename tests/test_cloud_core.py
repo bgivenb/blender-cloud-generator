@@ -1,14 +1,29 @@
 import unittest
+import random
 
 from cloud_core import build_cloud_plan, validate_settings
 
 
 class CloudCoreTests(unittest.TestCase):
+    def test_planning_does_not_change_global_random_state(self):
+        before = random.getstate()
+        build_cloud_plan("CUMULUS", 8, 42)
+        self.assertEqual(random.getstate(), before)
+
+    def test_nonfinite_settings_are_rejected(self):
+        for value in (float("nan"), float("inf"), -float("inf")):
+            with self.assertRaises(ValueError):
+                validate_settings("CUMULUS", 8, value, 0.5)
+
     def test_same_seed_produces_same_plan(self):
-        self.assertEqual(build_cloud_plan("CUMULUS", 20, 42), build_cloud_plan("CUMULUS", 20, 42))
+        self.assertEqual(
+            build_cloud_plan("CUMULUS", 20, 42), build_cloud_plan("CUMULUS", 20, 42)
+        )
 
     def test_different_seeds_change_plan(self):
-        self.assertNotEqual(build_cloud_plan("STRATUS", 20, 1), build_cloud_plan("STRATUS", 20, 2))
+        self.assertNotEqual(
+            build_cloud_plan("STRATUS", 20, 1), build_cloud_plan("STRATUS", 20, 2)
+        )
 
     def test_cloud_shapes_include_expected_anchors(self):
         self.assertEqual(len(build_cloud_plan("STRATUS", 8, 1)), 9)
