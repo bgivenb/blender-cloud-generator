@@ -50,3 +50,9 @@ jobs:
           if [ -f /tmp/blender.crash.txt ]; then
             sed -n '1,220p' /tmp/blender.crash.txt
           fi
+      - name: Diagnose native Mesh to Volume independently
+        if: failure()
+        run: |
+          for mode in visible hidden parented; do
+            blender --background --factory-startup --python-exit-code 1 --python scripts/diagnose_volume.py -- "$mode" || echo "Native volume diagnostic failed: $mode"
+          done
