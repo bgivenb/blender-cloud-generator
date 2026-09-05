@@ -29,6 +29,12 @@ jobs:
           sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
           sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install --no-install-recommends -y blender xvfb xauth
           blender --version
+      - name: Check Cycles with an unmodified factory scene
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: >-
+          xvfb-run -a blender --background --factory-startup --python-exit-code 1 --python-expr
+          "import bpy; s = bpy.context.scene; s.render.engine = 'CYCLES'; s.cycles.device = 'CPU'; s.cycles.samples = 1; s.cycles.use_denoising = False; s.render.resolution_x = s.render.resolution_y = 32; s.render.resolution_percentage = 100; bpy.ops.render.render()"
       - name: Exercise Blender behavior and failure recovery
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"

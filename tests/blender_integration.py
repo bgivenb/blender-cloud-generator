@@ -127,6 +127,9 @@ class BlenderIntegrationTests(unittest.TestCase):
         self.props.volume_resolution = 32
         bpy.ops.object.generate_cloud()
         scene = bpy.context.scene
+        # Use a complete render scene, including an explicit world, across host versions.
+        scene.world = bpy.data.worlds.new("Volume render test world")
+        scene.world.use_nodes = True
         bpy.ops.object.camera_add(location=(16, -20, 12))
         camera = bpy.context.active_object
         camera.rotation_euler = (
@@ -139,6 +142,7 @@ class BlenderIntegrationTests(unittest.TestCase):
         scene.render.engine = "CYCLES"
         scene.cycles.device = "CPU"
         scene.cycles.samples = 2
+        scene.cycles.use_denoising = False
         scene.render.resolution_x = scene.render.resolution_y = 32
         scene.render.resolution_percentage = 100
         scene.render.film_transparent = True
